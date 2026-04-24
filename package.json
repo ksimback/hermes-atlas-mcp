@@ -1,6 +1,7 @@
 {
   "name": "hermes-atlas-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
+  "mcpName": "io.github.ksimback/hermes-atlas-mcp",
   "description": "MCP server exposing the Hermes Atlas ecosystem catalog (100+ Hermes Agent tools, skills, plugins) to Claude Desktop, Cursor, Continue, and any MCP-aware client.",
   "type": "module",
   "main": "dist/index.js",
