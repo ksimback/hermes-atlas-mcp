@@ -37,28 +37,17 @@ const server = new McpServer({
 
 // ── Tools ────────────────────────────────────────────────────────────────
 
-server.tool(
+server.registerTool(
   "search_projects",
-  "Search the Hermes Atlas catalog of 100+ community-built Hermes Agent tools, skills, plugins, memory providers, workspaces, and integrations. Returns ranked projects matching the query, with summaries and canonical URLs.",
   {
-    query: z
-      .string()
-      .describe(
-        "Natural-language search query — e.g. 'memory providers', 'telegram bot', 'cybersecurity skills', 'vscode plugin'.",
-      ),
-    category: z
-      .string()
-      .optional()
-      .describe(
-        "Optional category filter. One of: 'Core & Official', 'Workspaces & GUIs', 'Memory & Context', 'Skills & Skill Registries', 'Plugins & Extensions', 'Integrations & Bridges', 'Multi-Agent & Orchestration', 'Developer Tools', 'Deployment & Infra', 'Domain Applications', 'Guides & Docs', 'Forks & Derivatives'.",
-      ),
-    limit: z
-      .number()
-      .int()
-      .min(1)
-      .max(50)
-      .optional()
-      .describe("Max results to return (default 10)."),
+    title: "Search Hermes Atlas projects",
+    description:
+      "Search the Hermes Atlas catalog of 100+ community-built Hermes Agent tools, skills, plugins, memory providers, workspaces, and integrations. Query can be natural language ('memory providers', 'telegram bot', 'vscode plugin'). Optional category filter: 'Core & Official' | 'Workspaces & GUIs' | 'Memory & Context' | 'Skills & Skill Registries' | 'Plugins & Extensions' | 'Integrations & Bridges' | 'Multi-Agent & Orchestration' | 'Developer Tools' | 'Deployment & Infra' | 'Domain Applications' | 'Guides & Docs' | 'Forks & Derivatives'. Optional limit (1-50, default 10).",
+    inputSchema: {
+      query: z.string(),
+      category: z.string().optional(),
+      limit: z.number().int().min(1).max(50).optional(),
+    },
   },
   async ({ query, category, limit }) => {
     const [repos, summaries] = await Promise.all([loadRepos(), loadSummaries()]);
@@ -91,12 +80,16 @@ server.tool(
   },
 );
 
-server.tool(
+server.registerTool(
   "get_project",
-  "Get the full summary, metadata, and canonical URL for a specific Hermes ecosystem project by owner/repo.",
   {
-    owner: z.string().describe("GitHub owner — e.g. 'NousResearch', 'vectorize-io'."),
-    repo: z.string().describe("GitHub repo name — e.g. 'hermes-agent', 'hindsight'."),
+    title: "Get Hermes Atlas project details",
+    description:
+      "Get the full summary, metadata, and canonical URL for a specific Hermes ecosystem project. Args: owner (GitHub owner, e.g. 'NousResearch'), repo (GitHub repo name, e.g. 'hermes-agent').",
+    inputSchema: {
+      owner: z.string(),
+      repo: z.string(),
+    },
   },
   async ({ owner, repo }) => {
     const [repos, summaries] = await Promise.all([loadRepos(), loadSummaries()]);
@@ -140,15 +133,15 @@ server.tool(
   },
 );
 
-server.tool(
+server.registerTool(
   "list_by_category",
-  "Return the ranked list of projects in a Hermes Atlas curated list (best-memory-providers, top-skills, deployment-options, multi-agent-frameworks, developer-tools, workspaces-and-guis).",
   {
-    slug: z
-      .string()
-      .describe(
-        "List slug. One of: 'best-memory-providers', 'top-skills', 'deployment-options', 'multi-agent-frameworks', 'developer-tools', 'workspaces-and-guis'.",
-      ),
+    title: "List Hermes Atlas projects by curated list",
+    description:
+      "Return the ranked list of projects in a Hermes Atlas curated list. Valid slug values: 'best-memory-providers' | 'top-skills' | 'deployment-options' | 'multi-agent-frameworks' | 'developer-tools' | 'workspaces-and-guis'.",
+    inputSchema: {
+      slug: z.string(),
+    },
   },
   async ({ slug }) => {
     const [lists, repos, listSummaries] = await Promise.all([
@@ -197,15 +190,15 @@ server.tool(
   },
 );
 
-server.tool(
+server.registerTool(
   "get_guide",
-  "Fetch the full text of a Hermes Handbook guide page — the beginner's guide ('hub'), the install guide ('install'), or the Hermes-vs-Claude-Code comparison ('vs-claude-code').",
   {
-    slug: z
-      .enum(["hub", "install", "vs-claude-code"])
-      .describe(
-        "Guide slug: 'hub' (beginner's guide at /guide/), 'install' (/guide/install/), or 'vs-claude-code' (/guide/vs-claude-code/).",
-      ),
+    title: "Get Hermes Handbook guide page",
+    description:
+      "Fetch the full text of a Hermes Handbook guide page. Args: slug — one of 'hub' (beginner's guide at /guide/), 'install' (/guide/install/), or 'vs-claude-code' (/guide/vs-claude-code/).",
+    inputSchema: {
+      slug: z.enum(["hub", "install", "vs-claude-code"]),
+    },
   },
   async ({ slug }) => {
     const urlMap: Record<string, string> = {
@@ -250,11 +243,15 @@ server.tool(
   },
 );
 
-server.tool(
+server.registerTool(
   "ask_atlas",
-  "Ask a free-form natural-language question about the Hermes Agent ecosystem. Delegates to the Hermes Atlas RAG endpoint which searches across repos, summaries, guides, and the ECOSYSTEM.md overview, then returns a cited answer.",
   {
-    question: z.string().describe("The question to ask — e.g. 'What's the best memory provider for production?' or 'How does Hermes compare to Claude Code?'"),
+    title: "Ask Hermes Atlas (free-form RAG)",
+    description:
+      "Ask a free-form natural-language question about the Hermes Agent ecosystem. Delegates to the Hermes Atlas RAG endpoint which searches across repos, summaries, guides, and the ECOSYSTEM.md overview, then returns a cited answer. Good for questions like 'What's the best memory provider for production?' or 'How does Hermes compare to Claude Code?'.",
+    inputSchema: {
+      question: z.string(),
+    },
   },
   async ({ question }) => {
     const res = await fetch(`${SITE_URL}/api/chat`, {
@@ -265,7 +262,12 @@ server.tool(
 
     if (!res.ok) {
       return {
-        content: [{ type: "text", text: `ask_atlas failed: HTTP ${res.status}. Try search_projects instead.` }],
+        content: [
+          {
+            type: "text",
+            text: `ask_atlas failed: HTTP ${res.status}. Try search_projects instead.`,
+          },
+        ],
         isError: true,
       };
     }
@@ -296,12 +298,13 @@ server.tool(
 
 // ── Resources ────────────────────────────────────────────────────────────
 
-server.resource(
+server.registerResource(
   "hermes-atlas-repos",
   "hermes-atlas://repos",
   {
-    name: "Hermes Atlas — full repo catalog",
-    description: "Full JSON catalog of every project tracked by Hermes Atlas (owner, repo, stars, category, description, URL).",
+    title: "Hermes Atlas — full repo catalog",
+    description:
+      "Full JSON catalog of every project tracked by Hermes Atlas (owner, repo, stars, category, description, URL).",
     mimeType: "application/json",
   },
   async (uri) => {
@@ -318,12 +321,13 @@ server.resource(
   },
 );
 
-server.resource(
+server.registerResource(
   "hermes-atlas-summaries",
   "hermes-atlas://summaries",
   {
-    name: "Hermes Atlas — AI-generated project summaries",
-    description: "Prose summary and highlights per project, generated from the GitHub README via LLM.",
+    title: "Hermes Atlas — AI-generated project summaries",
+    description:
+      "Prose summary and highlights per project, generated from the GitHub README via LLM.",
     mimeType: "application/json",
   },
   async (uri) => {
@@ -340,12 +344,13 @@ server.resource(
   },
 );
 
-server.resource(
+server.registerResource(
   "hermes-atlas-lists",
   "hermes-atlas://lists",
   {
-    name: "Hermes Atlas — curated lists",
-    description: "The six editorial lists (best-memory-providers, top-skills, etc.) with category filters.",
+    title: "Hermes Atlas — curated lists",
+    description:
+      "The six editorial lists (best-memory-providers, top-skills, etc.) with category filters.",
     mimeType: "application/json",
   },
   async (uri) => {
@@ -362,12 +367,13 @@ server.resource(
   },
 );
 
-server.resource(
+server.registerResource(
   "hermes-atlas-ecosystem",
   "hermes-atlas://ecosystem",
   {
-    name: "Hermes Atlas — ECOSYSTEM.md overview",
-    description: "The hand-curated narrative overview of the Hermes Agent ecosystem. Best starting point for 'what is Hermes and what's in the ecosystem' questions.",
+    title: "Hermes Atlas — ECOSYSTEM.md overview",
+    description:
+      "The hand-curated narrative overview of the Hermes Agent ecosystem. Best starting point for 'what is Hermes and what's in the ecosystem' questions.",
     mimeType: "text/markdown",
   },
   async (uri) => {
