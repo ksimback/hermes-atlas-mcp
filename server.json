@@ -6,13 +6,13 @@
     "url": "https://github.com/ksimback/hermes-atlas-mcp",
     "source": "github"
   },
-  "version": "0.1.1",
+  "version": "0.2.0",
   "websiteUrl": "https://hermesatlas.com",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "hermes-atlas-mcp",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "transport": {
         "type": "stdio"
       }

@@ -27,6 +27,14 @@ import {
   loadEcosystemMarkdown,
   searchRepos,
 } from "./catalog.js";
+import { runInstall, runUninstall, printUsage } from "./install.js";
+
+// ── Subcommand dispatch ──────────────────────────────────────────────────
+//
+// When invoked with a subcommand (install/uninstall/help), run that flow
+// and exit. With no args the file falls through to the MCP stdio server
+// (backwards-compatible default). Handled in main() below.
+const subcommand = process.argv[2];
 
 const SITE_URL = "https://hermesatlas.com";
 
@@ -409,6 +417,17 @@ server.registerResource(
 // ── Run ──────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (subcommand === "install") {
+    process.exit(await runInstall(process.argv.slice(3)));
+  }
+  if (subcommand === "uninstall") {
+    process.exit(await runUninstall(process.argv.slice(3)));
+  }
+  if (subcommand === "--help" || subcommand === "-h" || subcommand === "help") {
+    printUsage();
+    process.exit(0);
+  }
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("hermes-atlas-mcp connected on stdio");

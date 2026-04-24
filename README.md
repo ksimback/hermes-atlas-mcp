@@ -16,9 +16,38 @@ All catalog data is fetched live from hermesatlas.com (cached in-memory for 1 ho
 
 ## Install
 
-### Claude Desktop
+### Recommended — one command
 
-Add to `claude_desktop_config.json`:
+```bash
+npx -y hermes-atlas-mcp install --client claude-desktop
+```
+
+Replace `claude-desktop` with `cursor` or `claude-code` as needed. The installer finds the right config file for your OS, merges in the `hermes-atlas` entry without touching your other MCP servers, and tells you what to do next.
+
+Other flags:
+- `--print` — dry-run (shows the diff, writes nothing)
+- `--force` — overwrite an existing `hermes-atlas` entry without prompting
+
+To remove:
+
+```bash
+npx -y hermes-atlas-mcp uninstall --client claude-desktop
+```
+
+Fully quit and reopen the client after either command (closing the window isn't enough — the process needs to restart).
+
+### Manual install (if the installer won't work)
+
+#### Claude Desktop
+
+Find the config file:
+
+- **Easiest:** open Claude Desktop, go to **Settings → Developer → Edit Config**. The file opens in your default editor.
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux:** `~/.config/Claude/claude_desktop_config.json`
+
+Paste this (if the file is empty or doesn't exist) or merge the `hermes-atlas` entry into your existing `mcpServers` object:
 
 ```json
 {
@@ -31,11 +60,15 @@ Add to `claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop. You should see the five tools (`search_projects`, `get_project`, `list_by_category`, `get_guide`, `ask_atlas`) appear in the tool picker.
+Save. Fully quit Claude Desktop and reopen. The five tools appear in the tool picker.
 
-### Cursor / Continue / Windsurf
+#### Cursor
 
-Any MCP-compatible client works the same way. Configure a server named `hermes-atlas` that runs `npx -y hermes-atlas-mcp`.
+File: `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (per-project). Same JSON snippet as above.
+
+#### Claude Code
+
+Either use the installer above, or run `/mcp` inside Claude Code and add through its UI, or hand-edit `~/.claude.json`.
 
 ### From source
 
