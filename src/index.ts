@@ -37,6 +37,11 @@ const server = new McpServer({
 
 // ── Tools ────────────────────────────────────────────────────────────────
 
+// Suppress TS2589 "excessively deep" errors from zod shape inference in SDK 1.29.
+// The runtime is verified by smoke-test.mjs; the errors are a known TS inference
+// limit, not a real bug.
+
+// @ts-expect-error TS2589 zod+SDK depth inference
 server.registerTool(
   "search_projects",
   {
@@ -195,9 +200,9 @@ server.registerTool(
   {
     title: "Get Hermes Handbook guide page",
     description:
-      "Fetch the full text of a Hermes Handbook guide page. Args: slug — one of 'hub' (beginner's guide at /guide/), 'install' (/guide/install/), or 'vs-claude-code' (/guide/vs-claude-code/).",
+      "Fetch the full text of a Hermes Handbook guide page. Args: slug — one of 'hub' (beginner's guide at /guide/), 'install' (/guide/install/), or 'vs-claude-code' (/guide/vs-claude-code/). Any other slug returns an error.",
     inputSchema: {
-      slug: z.enum(["hub", "install", "vs-claude-code"]),
+      slug: z.string(),
     },
   },
   async ({ slug }) => {
@@ -206,6 +211,17 @@ server.registerTool(
       install: "/guide/install/",
       "vs-claude-code": "/guide/vs-claude-code/",
     };
+    if (!(slug in urlMap)) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Unknown guide slug "${slug}". Valid slugs: hub, install, vs-claude-code.`,
+          },
+        ],
+        isError: true,
+      };
+    }
     const url = `${SITE_URL}${urlMap[slug]}`;
     const res = await fetch(url);
     if (!res.ok) {
