@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.ksimback/hermes-atlas-mcp",
-  "description": "MCP server exposing the Hermes Atlas ecosystem catalog — 100+ community-built Hermes Agent tools, skills, plugins, memory providers, workspaces, and integrations — to Claude Desktop, Cursor, Continue, and any MCP-aware client.",
+  "description": "Search and fetch 100+ Hermes Agent tools, skills, plugins, and integrations from hermesatlas.com.",
   "repository": {
     "url": "https://github.com/ksimback/hermes-atlas-mcp",
     "source": "github"
